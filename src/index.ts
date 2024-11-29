@@ -1,9 +1,5 @@
-import type { StrategyVerifyCallback } from 'remix-auth'
-import type {
-  OAuth2Profile,
-  OAuth2StrategyVerifyParams,
-} from 'remix-auth-oauth2'
 import { OAuth2Strategy } from 'remix-auth-oauth2'
+import type { Strategy } from 'remix-auth/strategy'
 
 /**
  * @see https://developers.google.com/identity/protocols/oauth2/scopes
@@ -11,18 +7,27 @@ import { OAuth2Strategy } from 'remix-auth-oauth2'
 export type GoogleScope = string
 
 export type GoogleStrategyOptions = {
-  clientID: string
+  clientId: string
   clientSecret: string
-  callbackURL: string
+  redirectURI: string
   /**
    * @default "openid profile email"
    */
-  scope?: GoogleScope[] | string
+  scopes?: GoogleScope[]
   accessType?: 'online' | 'offline'
   includeGrantedScopes?: boolean
   prompt?: 'none' | 'consent' | 'select_account'
   hd?: string
   loginHint?: string
+}
+
+interface OAuth2Profile {
+  provider: string
+  name?: {
+    familyName?: string
+    givenName?: string
+    middleName?: string
+  }
 }
 
 export type GoogleProfile = {
@@ -32,7 +37,7 @@ export type GoogleProfile = {
     familyName: string
     givenName: string
   }
-  emails: [{ value: string }]
+  emails: [{ value: string; type?: string }]
   photos: [{ value: string }]
   _json: {
     sub: string
@@ -62,12 +67,8 @@ export const GoogleStrategyDefaultScopes = [
 ].join(GoogleStrategyScopeSeperator)
 export const GoogleStrategyDefaultName = 'google'
 
-export class GoogleStrategy<User> extends OAuth2Strategy<
-  User,
-  GoogleProfile,
-  GoogleExtraParams
-> {
-  public name = GoogleStrategyDefaultName
+export class GoogleStrategy<User> extends OAuth2Strategy<User> {
+  public override name = GoogleStrategyDefaultName
 
   private readonly accessType: string
 
@@ -83,32 +84,29 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
 
   constructor(
     {
-      clientID,
+      clientId,
       clientSecret,
-      callbackURL,
-      scope,
+      redirectURI,
+      scopes,
       accessType,
       includeGrantedScopes,
       prompt,
       hd,
       loginHint,
     }: GoogleStrategyOptions,
-    verify: StrategyVerifyCallback<
-      User,
-      OAuth2StrategyVerifyParams<GoogleProfile, GoogleExtraParams>
-    >
+    verify: Strategy.VerifyFunction<User, OAuth2Strategy.VerifyOptions>,
   ) {
     super(
       {
-        clientID,
+        clientId,
         clientSecret,
-        callbackURL,
-        authorizationURL: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenURL: 'https://oauth2.googleapis.com/token',
+        redirectURI,
+        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+        tokenEndpoint: 'https://oauth2.googleapis.com/token',
+        scopes: GoogleStrategy.parseScopes(scopes),
       },
-      verify
+      verify,
     )
-    this.scope = this.parseScope(scope)
     this.accessType = accessType ?? 'online'
     this.includeGrantedScopes = includeGrantedScopes ?? false
     this.prompt = prompt
@@ -116,7 +114,7 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
     this.loginHint = loginHint
   }
 
-  protected authorizationParams(): URLSearchParams {
+  protected override authorizationParams(): URLSearchParams {
     const params = new URLSearchParams({
       access_type: this.accessType,
       include_granted_scopes: String(this.includeGrantedScopes),
@@ -156,13 +154,11 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
   }
 
   // Allow users the option to pass a scope string, or typed array
-  private parseScope(scope: GoogleStrategyOptions['scope']) {
-    if (!scope) {
-      return GoogleStrategyDefaultScopes
-    } else if (Array.isArray(scope)) {
-      return scope.join(GoogleStrategyScopeSeperator)
+  public static parseScopes(scopes: GoogleStrategyOptions['scopes']) {
+    if (!scopes || scopes.length === 0) {
+      return [GoogleStrategyDefaultScopes]
     }
 
-    return scope
+    return scopes
   }
 }

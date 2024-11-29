@@ -3,12 +3,15 @@
   "version": "2.0.0",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
+  "sideEffects": false,
+  "type": "module",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "lint": "eslint . --fix --ignore-path .gitignore",
+    "lint": "eslint ./src --fix",
     "format": "prettier --config .prettierrc --write --list-different --ignore-path .gitignore .",
-    "prepare": "husky install"
+    "prepare": "husky",
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
   "keywords": [
     "remix",
@@ -35,31 +38,39 @@
   ],
   "peerDependencies": {
     "@remix-run/server-runtime": "^2.0.1",
-    "remix-auth": "^3.2.1"
+    "remix-auth": "^4.0.0"
   },
   "devDependencies": {
-    "@remix-run/node": "^2.0.1",
-    "@remix-run/react": "^2.0.1",
-    "@remix-run/server-runtime": "^2.0.1",
-    "@types/jest": "^27.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.8.1",
-    "@typescript-eslint/parser": "^5.8.1",
-    "babel-jest": "^27.4.5",
-    "eslint": "^8.5.0",
+    "@eslint/js": "^9.15.0",
+    "@remix-run/node": "^2",
+    "@remix-run/react": "^2",
+    "@remix-run/server-runtime": "^2",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "babel-jest": "^29.7.0",
+    "eslint": "^9.15.0",
     "eslint-config-galex": "^3.5.3",
+    "globals": "^15.12.0",
     "husky": ">=6",
     "lint-staged": ">=12.1.4",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "remix-auth": "^3.2.1",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+    "prettier": "^3.4.1",
+    "react": "^18.3.1",
+    "remix-auth": "^4.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0"
   },
   "dependencies": {
-    "remix-auth-oauth2": "^1.11.0"
+    "remix-auth-oauth2": "^3.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "yarn lint",
     "*.{js,jsx,ts,tsx,css,json,md}": "yarn format"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
