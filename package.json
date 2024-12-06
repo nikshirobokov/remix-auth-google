@@ -22,12 +22,18 @@
     "google-auth"
   ],
   "author": {
-    "name": "Bhanu Teja Pachipulusu",
-    "email": "pbteja1998@gmail.com",
-    "url": "https://github.com/pbteja1998"
+    "name": "Steve Purves",
+    "email": "steve@curvenote.com"
   },
+  "contributors": [
+    {
+      "name": "Bhanu Teja Pachipulusu",
+      "email": "pbteja1998@gmail.com",
+      "url": "https://github.com/pbteja1998"
+    }
+  ],
   "repository": {
-    "url": "https://github.com/pbteja1998/remix-auth-google",
+    "url": "git+https://github.com/pbteja1998/remix-auth-google.git",
     "type": "git"
   },
   "license": "MIT",
@@ -72,5 +78,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
