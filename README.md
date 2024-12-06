@@ -1,4 +1,6 @@
-# GoogleStrategy
+# @curvenote/remix-auth-google
+
+**Forked** and updated from [https://github.com/pbteja1998/remix-auth-google](https://github.com/pbteja1998/remix-auth-google) to use the latest `remix-auth-oauth2` strategy.
 
 <!-- Description -->
 
@@ -34,7 +36,7 @@ let googleStrategy = new GoogleStrategy(
   async ({ accessToken, refreshToken, extraParams, profile }) => {
     // Get the user data from your DB or API using the tokens and profile
     return User.findOrCreate({ email: profile.emails[0].value })
-  }
+  },
 )
 
 authenticator.use(googleStrategy)
