@@ -68,6 +68,7 @@ export const GoogleStrategyDefaultScopes = [
 export const GoogleStrategyDefaultName = 'google'
 
 export class GoogleStrategy<User> extends OAuth2Strategy<User> {
+  public static userInfoURL = 'https://www.googleapis.com/oauth2/v3/userinfo'
   public override name = GoogleStrategyDefaultName
 
   private readonly accessType: string
@@ -80,7 +81,7 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
 
   private readonly loginHint?: string
 
-  private readonly userInfoURL = 'https://www.googleapis.com/oauth2/v3/userinfo'
+  private readonly responseType: string
 
   constructor(
     {
@@ -105,8 +106,13 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
         tokenEndpoint: 'https://oauth2.googleapis.com/token',
         scopes: GoogleStrategy.parseScopes(scopes),
       },
-      verify,
+      async (options) => {
+        // const user await this.userProfile(options.tokens.accessToken);
+        return verify(options)
+      },
     )
+
+    this.responseType = 'code'
     this.accessType = accessType ?? 'online'
     this.includeGrantedScopes = includeGrantedScopes ?? false
     this.prompt = prompt
@@ -114,25 +120,49 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
     this.loginHint = loginHint
   }
 
-  protected override authorizationParams(): URLSearchParams {
-    const params = new URLSearchParams({
-      access_type: this.accessType,
-      include_granted_scopes: String(this.includeGrantedScopes),
-    })
+  protected override authorizationParams(
+    params: URLSearchParams,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    request: Request,
+  ): URLSearchParams {
+    const newParams = new URLSearchParams(params)
+    newParams.set('access_type', this.accessType)
+    newParams.set('include_granted_scopes', String(this.includeGrantedScopes))
+    if (this.options.clientId) {
+      newParams.set('client_id', this.client.clientId)
+    }
+    if (this.options.scopes) {
+      newParams.set('scope', this.stringifyScopes(this.options.scopes))
+    }
+    if (this.options.redirectURI) {
+      newParams.set(
+        'redirect_uri',
+        typeof this.options.redirectURI === 'string'
+          ? this.options.redirectURI
+          : this.options.redirectURI.toString(),
+      )
+    }
+    if (this.responseType) {
+      newParams.set('response_type', this.responseType)
+    }
     if (this.prompt) {
-      params.set('prompt', this.prompt)
+      newParams.set('prompt', this.prompt)
     }
     if (this.hd) {
-      params.set('hd', this.hd)
+      newParams.set('hd', this.hd)
     }
     if (this.loginHint) {
-      params.set('login_hint', this.loginHint)
+      newParams.set('login_hint', this.loginHint)
     }
-    return params
+    return newParams
   }
 
-  protected async userProfile(accessToken: string): Promise<GoogleProfile> {
-    const response = await fetch(this.userInfoURL, {
+  protected stringifyScopes(scopes: GoogleScope[]) {
+    return scopes.join(GoogleStrategyScopeSeperator)
+  }
+
+  public static async userProfile(accessToken: string): Promise<GoogleProfile> {
+    const response = await fetch(GoogleStrategy.userInfoURL, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
