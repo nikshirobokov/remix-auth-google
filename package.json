@@ -1,6 +1,6 @@
 {
   "name": "@curvenote/remix-auth-google",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "sideEffects": false,
@@ -33,7 +33,7 @@
     }
   ],
   "repository": {
-    "url": "git+https://github.com/pbteja1998/remix-auth-google.git",
+    "url": "git+https://github.com/curvenote/remix-auth-google.git",
     "type": "git"
   },
   "license": "MIT",
@@ -44,7 +44,7 @@
   ],
   "peerDependencies": {
     "@remix-run/server-runtime": "^2.0.1",
-    "remix-auth": "^4.0.0"
+    "remix-auth": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
@@ -64,13 +64,13 @@
     "lint-staged": ">=12.1.4",
     "prettier": "^3.4.1",
     "react": "^18.3.1",
-    "remix-auth": "^4.0.0",
+    "remix-auth": "^4.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.16.0"
   },
   "dependencies": {
-    "remix-auth-oauth2": "^3.1.0"
+    "remix-auth-oauth2": "^3.2.2"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "yarn lint",
