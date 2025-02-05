@@ -1,63 +1,11 @@
 import { OAuth2Strategy } from 'remix-auth-oauth2'
 import type { Strategy } from 'remix-auth/strategy'
-
-/**
- * @see https://developers.google.com/identity/protocols/oauth2/scopes
- */
-export type GoogleScope = string
-
-export type GoogleStrategyOptions = {
-  clientId: string
-  clientSecret: string
-  redirectURI: string
-  /**
-   * @default "openid profile email"
-   */
-  scopes?: GoogleScope[]
-  accessType?: 'online' | 'offline'
-  includeGrantedScopes?: boolean
-  prompt?: 'none' | 'consent' | 'select_account'
-  hd?: string
-  loginHint?: string
-}
-
-interface OAuth2Profile {
-  provider: string
-  name?: {
-    familyName?: string
-    givenName?: string
-    middleName?: string
-  }
-}
-
-export type GoogleProfile = {
-  id: string
-  displayName: string
-  name: {
-    familyName: string
-    givenName: string
-  }
-  emails: [{ value: string; type?: string }]
-  photos: [{ value: string }]
-  _json: {
-    sub: string
-    name: string
-    given_name: string
-    family_name: string
-    picture: string
-    locale: string
-    email: string
-    email_verified: boolean
-    hd: string
-  }
-} & OAuth2Profile
-
-export type GoogleExtraParams = {
-  expires_in: 3920
-  token_type: 'Bearer'
-  scope: string
-  id_token: string
-} & Record<string, string | number>
+import type {
+  GoogleStrategyOptions,
+  GoogleScope,
+  GoogleProfile,
+} from './types.js'
+export * from './types.js'
 
 export const GoogleStrategyScopeSeperator = ' '
 export const GoogleStrategyDefaultScopes = [
@@ -99,6 +47,9 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
   ) {
     super(
       {
+        cookie: {
+          name: 'google-oauth2',
+        },
         clientId,
         clientSecret,
         redirectURI,
@@ -106,10 +57,7 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
         tokenEndpoint: 'https://oauth2.googleapis.com/token',
         scopes: GoogleStrategy.parseScopes(scopes),
       },
-      async (options) => {
-        // const user await this.userProfile(options.tokens.accessToken);
-        return verify(options)
-      },
+      verify,
     )
 
     this.responseType = 'code'
@@ -125,6 +73,7 @@ export class GoogleStrategy<User> extends OAuth2Strategy<User> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     request: Request,
   ): URLSearchParams {
+    // pass through on existing params allows for state to flow through
     const newParams = new URLSearchParams(params)
     newParams.set('access_type', this.accessType)
     newParams.set('include_granted_scopes', String(this.includeGrantedScopes))
